@@ -19,9 +19,20 @@ client.on("guildMemberAdd", async (member) => {
         PermissionsBitField.Flags.ManageNicknames
       )
     ) {
-      await member.setNickname(`AG ${member.user.username}`);
+
+      let name = member.displayName;
+
+      // Emoji aur fancy symbols remove karega
+      name = name.replace(/[^\p{L}\p{N} ]/gu, "");
+
+      // Agar naam bahut lamba ho
+      name = name.substring(0, 25).trim();
+
+      await member.setNickname(`AG ${name}`);
+
       console.log(`Nickname changed: ${member.user.tag}`);
     }
+
   } catch (err) {
     console.error(err);
   }
