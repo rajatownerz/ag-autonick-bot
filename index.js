@@ -8,43 +8,60 @@ const client = new Client({
   ]
 });
 
+function cleanName(name) {
+
+  const fancyMap = {
+    "𝐀":"A","𝐁":"B","𝐂":"C","𝐃":"D","𝐄":"E","𝐅":"F","𝐆":"G",
+    "𝐇":"H","𝐈":"I","𝐉":"J","𝐊":"K","𝐋":"L","𝐌":"M","𝐍":"N",
+    "𝐎":"O","𝐏":"P","𝐐":"Q","𝐑":"R","𝐒":"S","𝐓":"T",
+    "𝐔":"U","𝐕":"V","𝐖":"W","𝐗":"X","𝐘":"Y","𝐙":"Z",
+
+    "𝐚":"A","𝐛":"B","𝐜":"C","𝐝":"D","𝐞":"E","𝐟":"F",
+    "𝐠":"G","𝐡":"H","𝐢":"I","𝐣":"J","𝐤":"K","𝐥":"L",
+    "𝐦":"M","𝐧":"N","𝐨":"O","𝐩":"P","𝐪":"Q","𝐫":"R",
+    "𝐬":"S","𝐭":"T","𝐮":"U","𝐯":"V","𝐰":"W","𝐱":"X",
+    "𝐲":"Y","𝐳":"Z"
+  };
+
+  return name
+    .split("")
+    .map(char => fancyMap[char] || char)
+    .join("")
+    .replace(/[^A-Z0-9 ]/gi, "")
+    .trim()
+    .toUpperCase();
+}
+
 client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
 });
 
 client.on("guildMemberAdd", async (member) => {
+
   try {
+
     if (
       member.guild.members.me.permissions.has(
         PermissionsBitField.Flags.ManageNicknames
       )
     ) {
 
-      let name = member.displayName;
+      let name = cleanName(member.displayName);
 
-      // Fancy Unicode letters ko normal letters me convert karne ki koshish
-      name = name.normalize("NFKD");
-
-      // Sirf normal A-Z, a-z, 0-9 rakhega
-      name = name.replace(/[^a-zA-Z0-9 ]/g, "");
-
-      // Extra spaces remove
-      name = name.trim();
-
-      // Agar naam khali ho gaya
       if (!name) {
-        name = member.user.username;
+        name = member.user.username.toUpperCase();
       }
 
-      // Nickname set
       await member.setNickname(`AG ${name.substring(0, 25)}`);
 
       console.log(`Nickname changed: ${member.user.tag}`);
 
     }
+
   } catch (err) {
     console.error(err);
   }
+
 });
 
 client.login(process.env.BOT_TOKEN);
