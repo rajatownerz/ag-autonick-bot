@@ -9,7 +9,6 @@ const client = new Client({
 });
 
 function cleanName(name) {
-
   const fancyMap = {
     "𝐀":"A","𝐁":"B","𝐂":"C","𝐃":"D","𝐄":"E","𝐅":"F","𝐆":"G",
     "𝐇":"H","𝐈":"I","𝐉":"J","𝐊":"K","𝐋":"L","𝐌":"M","𝐍":"N",
@@ -25,9 +24,9 @@ function cleanName(name) {
 
   return name
     .split("")
-    .map(char => fancyMap[char] || char)
+    .map(c => fancyMap[c] || c)
     .join("")
-    .replace(/[^A-Z0-9 ]/gi, "")
+    .replace(/[^a-zA-Z0-9 ]/g, "")
     .trim()
     .toUpperCase();
 }
@@ -37,7 +36,6 @@ client.once("ready", () => {
 });
 
 client.on("guildMemberAdd", async (member) => {
-
   try {
 
     if (
@@ -46,22 +44,22 @@ client.on("guildMemberAdd", async (member) => {
       )
     ) {
 
+      // Sirf Discord display name lega, username nahi
       let name = cleanName(member.displayName);
 
+      // Agar naam khali ho to default
       if (!name) {
-        name = member.user.username.toUpperCase();
+        name = "MEMBER";
       }
 
       await member.setNickname(`AG ${name.substring(0, 25)}`);
 
-      console.log(`Nickname changed: ${member.user.tag}`);
-
+      console.log(`Nickname changed for ${member.user.tag}`);
     }
 
   } catch (err) {
     console.error(err);
   }
-
 });
 
 client.login(process.env.BOT_TOKEN);
