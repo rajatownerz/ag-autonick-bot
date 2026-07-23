@@ -22,17 +22,26 @@ client.on("guildMemberAdd", async (member) => {
 
       let name = member.displayName;
 
-      // Emoji aur fancy symbols remove karega
-      name = name.replace(/[^\p{L}\p{N} ]/gu, "");
+      // Fancy Unicode letters ko normal letters me convert karne ki koshish
+      name = name.normalize("NFKD");
 
-      // Agar naam bahut lamba ho
-      name = name.substring(0, 25).trim();
+      // Sirf normal A-Z, a-z, 0-9 rakhega
+      name = name.replace(/[^a-zA-Z0-9 ]/g, "");
 
-      await member.setNickname(`AG ${name}`);
+      // Extra spaces remove
+      name = name.trim();
+
+      // Agar naam khali ho gaya
+      if (!name) {
+        name = member.user.username;
+      }
+
+      // Nickname set
+      await member.setNickname(`AG ${name.substring(0, 25)}`);
 
       console.log(`Nickname changed: ${member.user.tag}`);
-    }
 
+    }
   } catch (err) {
     console.error(err);
   }
