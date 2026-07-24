@@ -1,13 +1,26 @@
 {
   "name": "ag-autonick-bot",
   "version": "1.0.0",
-  "description": "AG Auto Nickname Bot",
+  "description": "Professional AG Auto Nickname Discord Bot",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node index.js"
   },
+  "keywords": [
+    "discord",
+    "bot",
+    "nickname",
+    "ag"
+  ],
+  "author": "Rajat",
+  "license": "MIT",
   "dependencies": {
     "discord.js": "^14.21.0",
-    "dotenv": "^16.4.7"
+    "dotenv": "^16.4.7",
+    "unidecode": "^1.1.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
