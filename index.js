@@ -1,5 +1,11 @@
-const { Client, GatewayIntentBits, PermissionsBitField } = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits,
+  PermissionsBitField,
+} = require("discord.js");
+
 require("dotenv").config();
+const unidecode = require("unidecode");
 
 const client = new Client({
   intents: [
@@ -8,40 +14,50 @@ const client = new Client({
   ],
 });
 
-function cleanName(name) {
-  if (!name) return "MEMBER";
-
-  return name
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\p{L}\p{N} ]/gu, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toUpperCase();
-}
-
 client.once("ready", () => {
-  console.log(`Logged in as ${client.user.tag}`);
+  console.log(`✅ Logged in as ${client.user.tag}`);
 });
+
+function cleanName(name) {
+  // Stylish Unicode → Normal
+  let cleaned = unidecode(name);
+
+  // Sirf English letters aur numbers rakho
+  cleaned = cleaned.replace(/[^a-zA-Z0-9 ]/g, "");
+
+  // Extra spaces hatao
+  cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+  // Uppercase
+  cleaned = cleaned.toUpperCase();
+
+  if (!cleaned) cleaned = "USER";
+
+  return cleaned;
+}
 
 client.on("guildMemberAdd", async (member) => {
   try {
-    const me = member.guild.members.me;
-
-    if (!me.permissions.has(PermissionsBitField.Flags.ManageNicknames)) {
+    if (
+      !member.guild.members.me.permissions.has(
+        PermissionsBitField.Flags.ManageNicknames
+      )
+    ) {
+      console.log("❌ Manage Nicknames permission missing.");
       return;
     }
 
-    // Display Name ko priority do
-    const sourceName = member.user.globalName || member.displayName;
+    // Display Name ya Username
+    const original =
+      member.displayName || member.user.globalName || member.user.username;
 
-    const finalName = cleanName(sourceName);
+    const finalName = `AG ${cleanName(original)}`;
 
-    await member.setNickname(`AG ${finalName}`);
+    await member.setNickname(finalName);
 
-    console.log(`Nickname set: AG ${finalName}`);
+    console.log(`✅ ${original} → ${finalName}`);
   } catch (err) {
-    console.error(err);
+    console.error("Nickname Error:", err);
   }
 });
 
