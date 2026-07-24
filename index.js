@@ -5,7 +5,6 @@ const {
 } = require("discord.js");
 
 require("dotenv").config();
-const unidecode = require("unidecode");
 
 const client = new Client({
   intents: [
@@ -15,44 +14,43 @@ const client = new Client({
 });
 
 client.once("ready", () => {
-  console.log(`${client.user.tag} Online`);
+  console.log(`${client.user.tag} is Online!`);
 });
 
 function cleanName(name) {
-  // Stylish fonts ko normal letters me convert karega
-  name = unidecode(name);
+  if (!name) return "";
 
-  // Emojis aur special characters hata dega
-  name = name.replace(/[^a-zA-Z0-9 ]/g, "");
-
-  // Extra spaces hatao
-  name = name.replace(/\s+/g, " ").trim();
-
-  // CAPITAL letters
-  name = name.toUpperCase();
-
-  return name;
+  return name
+    .normalize("NFKC")
+    .replace(/[\u{1F300}-\u{1FAFF}]/gu, "") // Emojis remove
+    .replace(/[^\p{L}\p{N}\s]/gu, "")       // Special chars remove
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
 }
 
 client.on("guildMemberAdd", async (member) => {
   try {
+    const me = member.guild.members.me;
+
     if (
-      !member.guild.members.me.permissions.has(
-        PermissionsBitField.Flags.ManageNicknames
-      )
+      !me.permissions.has(PermissionsBitField.Flags.ManageNicknames)
     ) {
+      console.log("Manage Nicknames permission missing.");
       return;
     }
 
-    const originalName =
+    const sourceName =
       member.user.globalName ||
       member.user.username;
 
-    const finalName = `AG ${cleanName(originalName)}`;
+    const finalName = cleanName(sourceName);
 
-    await member.setNickname(finalName);
+    if (finalName.length > 0) {
+      await member.setNickname(`AG ${finalName}`);
+      console.log(`Nickname changed: AG ${finalName}`);
+    }
 
-    console.log(`${originalName} -> ${finalName}`);
   } catch (err) {
     console.error(err);
   }
