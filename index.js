@@ -1,7 +1,7 @@
 const {
   Client,
   GatewayIntentBits,
-  PermissionsBitField,
+  PermissionsBitField
 } = require("discord.js");
 
 require("dotenv").config();
@@ -10,30 +10,28 @@ const unidecode = require("unidecode");
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,
-  ],
+    GatewayIntentBits.GuildMembers
+  ]
 });
 
 client.once("ready", () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
+  console.log(`${client.user.tag} Online`);
 });
 
 function cleanName(name) {
-  // Stylish Unicode → Normal
-  let cleaned = unidecode(name);
+  // Stylish fonts ko normal letters me convert karega
+  name = unidecode(name);
 
-  // Sirf English letters aur numbers rakho
-  cleaned = cleaned.replace(/[^a-zA-Z0-9 ]/g, "");
+  // Emojis aur special characters hata dega
+  name = name.replace(/[^a-zA-Z0-9 ]/g, "");
 
   // Extra spaces hatao
-  cleaned = cleaned.replace(/\s+/g, " ").trim();
+  name = name.replace(/\s+/g, " ").trim();
 
-  // Uppercase
-  cleaned = cleaned.toUpperCase();
+  // CAPITAL letters
+  name = name.toUpperCase();
 
-  if (!cleaned) cleaned = "USER";
-
-  return cleaned;
+  return name;
 }
 
 client.on("guildMemberAdd", async (member) => {
@@ -43,21 +41,20 @@ client.on("guildMemberAdd", async (member) => {
         PermissionsBitField.Flags.ManageNicknames
       )
     ) {
-      console.log("❌ Manage Nicknames permission missing.");
       return;
     }
 
-    // Display Name ya Username
-    const original =
-      member.displayName || member.user.globalName || member.user.username;
+    const originalName =
+      member.user.globalName ||
+      member.user.username;
 
-    const finalName = `AG ${cleanName(original)}`;
+    const finalName = `AG ${cleanName(originalName)}`;
 
     await member.setNickname(finalName);
 
-    console.log(`✅ ${original} → ${finalName}`);
+    console.log(`${originalName} -> ${finalName}`);
   } catch (err) {
-    console.error("Nickname Error:", err);
+    console.error(err);
   }
 });
 
