@@ -20,21 +20,24 @@ client.once("ready", () => {
 function cleanName(name) {
   if (!name) return "";
 
-  return name
-    .normalize("NFKC")
-    .replace(/[\u{1F300}-\u{1FAFF}]/gu, "")
-    .replace(/[^\p{L}\p{N}\s]/gu, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toUpperCase();
+  name = name.normalize("NFKC");
+
+  // Emojis aur special symbols hatao
+  name = name.replace(/[^A-Za-z0-9]/g, "");
+
+  // CAPITAL letters
+  name = name.toUpperCase();
+
+  return name;
 }
 
-// Join hone par
+// New Member Join
 client.on("guildMemberAdd", async (member) => {
   try {
     const me = member.guild.members.me;
 
     if (!me.permissions.has(PermissionsBitField.Flags.ManageNicknames)) {
+      console.log("Manage Nicknames permission missing.");
       return;
     }
 
@@ -42,17 +45,18 @@ client.on("guildMemberAdd", async (member) => {
       member.user.globalName ||
       member.user.username;
 
-    const finalName = `AG ${cleanName(sourceName)}`;
+    const finalName = cleanName(sourceName);
 
-    await member.setNickname(finalName);
-
-    console.log(`Joined -> ${finalName}`);
+    if (finalName.length > 0) {
+      await member.setNickname(`AG ${finalName}`);
+      console.log(`Nickname changed: AG ${finalName}`);
+    }
   } catch (err) {
     console.error(err);
   }
 });
 
-// Member update hone par
+// Member Update
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
   try {
     const me = newMember.guild.members.me;
@@ -65,11 +69,11 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
       newMember.user.globalName ||
       newMember.user.username;
 
-    const finalName = `AG ${cleanName(sourceName)}`;
+    const finalName = cleanName(sourceName);
 
-    if (newMember.nickname !== finalName) {
-      await newMember.setNickname(finalName);
-      console.log(`Updated -> ${finalName}`);
+    if (newMember.nickname !== `AG ${finalName}`) {
+      await newMember.setNickname(`AG ${finalName}`);
+      console.log(`Nickname Updated: AG ${finalName}`);
     }
   } catch (err) {
     console.error(err);
